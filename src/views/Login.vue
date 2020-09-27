@@ -45,6 +45,8 @@ import firebase from 'firebase'
         firebase.auth().onAuthStateChanged( user => {
           if (user) {
             this.isAuthenticated = true
+
+            this.$router.push('/dashboard')
           }
         })
     },
@@ -53,12 +55,6 @@ import firebase from 'firebase'
         firebase.auth().signInWithEmailAndPassword(this.email, this.password)
           .catch(error => this.error = error.message)
       },
-      logOut () {
-        firebase.auth().signOut()
-          .then(() => {
-            this.isAuthenticated = false
-          })
-      }
     },
   }
 
