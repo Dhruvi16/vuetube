@@ -10,13 +10,25 @@
         <li v-for="category in categories" :class="{ 'is-active' : activeCategory === category.title }"><a @click="setCategory(category.title)">{{ category.title }}</a></li>
       </ul>
     </div>
+
+    <tab-movie
+      v-for="category in categories"
+      :key="category.id"
+      :category="category.id">
+    </tab-movie>
   </div>
 </template>
 
 <script>
 import { db } from '../main'
+
+import TabMovie from '../components/TabMovie.vue'
+
 export default {
   name: 'dashboard',
+  components: {
+    TabMovie
+  },
   data () {
     return {
       categories: [],
