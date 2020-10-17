@@ -1,12 +1,15 @@
 <template>
-    <div>
-        <div class="columns is-multiline" v-for="movie in movies" :key="movie.id">
-            <div class="card column is-4">
+    <div class="columns is-multiline">
+        <div class="column is-4" v-for="movie in movies" :key="movie.id">
+            <div class="card">
             <div class="card-image">
                 <iframe :src="embedable(movie.url)" width="100%" height="200"></iframe>
             </div>
             <div class="card-content">
                 {{movie.title}}
+            </div>
+            <div class="card-footer">
+                <a @click="deleteMovie(movie)" class="button is-danger card-footer-item">Delete</a>
             </div>
         </div>
         </div>
@@ -30,13 +33,16 @@ export default {
     mounted () {
         if(this.$props.category == 'Newest') {
             for (let i = 0; i < this.$props.categories.length; i++) {
-                db.collection('categories').doc(this.$props.categories[i].id).collection('movies').get()
+                const categoryID = this.$props.categories[i].id
+                db.collection('categories').doc(categoryID).collection('movies').get()
                     .then ((querySnapshot) => {
                         querySnapshot.forEach((collection) => {
                             if(this.movies.length < 7) {
                                 this.movies.push({
                                     title: collection.data().title,
-                                    url: collection.data().url
+                                    url: collection.data().url,
+                                    id: collection.id,
+                                    category: categoryID
                                 })
                             }
                         })
@@ -52,6 +58,24 @@ export default {
         }
     },
     methods: {
+        deleteMovie(movie) {
+            if(this.$props.category == 'Newest') {
+                db.collection('categories').doc(movie.category).collection('movies').doc(movie.id).delete()
+
+                let index
+
+                for (let i = 0; i < this.movies.length; i++) {
+                    if(movie.id === this.movies[i].id) {
+                        index = i
+                        break
+                    }
+                }
+
+                this.movies.splice(index,1)
+            } else {
+                db.collection('categories').doc(this.$props.category).collection('movies').doc(movie.id).delete()
+            }
+        },
         embedable (url) {
             return 'https://youtube.com/embed/' + url.split("=")[1]
         }
