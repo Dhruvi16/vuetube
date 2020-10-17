@@ -35,6 +35,9 @@
               <button @click="showCategoryForm = !showCategoryForm" class="button is-primary">Add Category</button>
             </p>
             <p class="control">
+              <button @click="showMovieForm = !showMovieForm" class="button is-primary">Add Movie</button>
+            </p>
+            <p class="control">
               <button @click="logOut" class="button is-danger">Log out</button>
             </p>
           </div>
@@ -59,6 +62,30 @@
       <button class="modal-close is-large" aria-label="close" @click="showCategoryForm = !showCategoryForm"></button>
     </div>
 
+    <div class="modal" :class="{ 'is-active': showMovieForm }">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <form @submit.prevent="addMovie">
+          <div class="field">
+            <input type="text" class="input" v-model="title" placeholder="Title">
+          </div>
+          <div class="field">
+            <input type="text" class="input" v-model="url" placeholder="URL">
+          </div>
+          <div class="field">
+            <select v-model="category">
+              <option value="empty" selected>Choose category</option>
+              <option v-for="category in categories" :value="category.id">{{ category.title }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <button class="button is-success">Add</button>
+          </div>
+        </form>        
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showMovieForm = !showMovieForm"></button>
+    </div>
+
     <router-view/>
   </div>
 </template>
@@ -72,7 +99,11 @@
       return {
         isAuthenticated: false,
         showCategoryForm: false,
-        title: ''
+        showMovieForm: false,
+        title: '',
+        category: 'empty',
+        url: '',
+        categories: []
       }
     },
     created () {
@@ -82,7 +113,31 @@
         }
       })
     },
+    firestore () {
+      return {
+        categories: db.collection('categories')
+      }
+    },
     methods: {
+      addMovie () {
+        if (this.title && this.category !== 'empty') {
+          const movie = {
+            title: this.title,
+            url: this.url
+          }
+
+          db.collection('categories').doc(this.category).collection('movies').add(movie)
+
+          this.title = ''
+          this.category = 'empty'
+          this.url = ''
+          this.showMovieForm = false
+
+        } else {
+          alert("Fill out the form please!")
+        } 
+
+      },
       addCategory () {
         const category = {
           title: this.title
