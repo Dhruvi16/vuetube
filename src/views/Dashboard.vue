@@ -21,6 +21,8 @@
       v-for="category in categories"
       :key="category.id"
       :category="category.id"
+      :categoryTitle="category.title"
+      @updateCategory="setCategory"
       v-if="activeCategory === category.title">
     </tab-movie>
   </div>
