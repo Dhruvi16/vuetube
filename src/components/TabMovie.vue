@@ -29,6 +29,24 @@
                 {{movie.title}}
             </div>
             <div class="card-footer">
+                <a @click="setMovie(movie)" class="button is-primary card-footer-item">Edit</a>
+                <div class="modal" :class="{ 'is-active': showMovieForm }">
+                <div class="modal-background"></div>
+                <div class="modal-content">
+                    <form @submit.prevent="saveMovie(movie)">
+                    <div class="field">
+                        <input type="text" class="input" v-model="movieTitle" placeholder="Title">
+                    </div>
+                    <div class="field">
+                        <input type="text" class="input" v-model="movieUrl" placeholder="URL">
+                    </div>
+                    <div class="field">
+                        <button class="button is-success">Save</button>
+                    </div>
+                    </form>        
+                </div>
+                <button class="modal-close is-large" aria-label="close" @click="showMovieForm = !showMovieForm"></button>
+                </div>
                 <a @click="deleteMovie(movie)" class="button is-danger card-footer-item">Delete</a>
             </div>
         </div>
@@ -50,7 +68,11 @@ export default {
         return {
             movies: [],
             title: '',
-            showCategoryForm: false
+            showCategoryForm: false,
+            showMovieForm: false,
+            movieTitle: '',
+            movieUrl: '',
+            movieID: ''
         }
     },
     mounted () {
@@ -111,6 +133,20 @@ export default {
             db.collection('categories').doc(this.$props.category).update(category)
 
             this.$emit('updateCategory', this.title)
+        },
+        setMovie (movie) {
+            this.showMovieForm = !this.showMovieForm
+            this.movieTitle = movie.title
+            this.movieUrl = movie.url
+        },
+        saveMovie (movie) {
+            const newMovie = {
+                title: this.movieTitle,
+                url: this.movieUrl
+            }
+            db.collection('categories').doc(this.$props.category).collection('movies').doc(movie.id).update(newMovie)
+
+            this.showMovieForm = false
         }
     }
 }
