@@ -1,5 +1,25 @@
 <template>
     <div class="columns is-multiline">
+        <div class="column is-12" v-if="category != 'Newest'">
+            <button class="button is-primary" @click="showCategoryForm = !showCategoryForm">Edit Category</button>
+        </div>
+
+         <div class="modal" :class="{ 'is-active': showCategoryForm }">
+            <div class="modal-background"></div>
+                <div class="modal-content">
+                    <form @submit.prevent="saveCategory">
+                    <div class="field">
+                        <input type="text" class="input" v-model="title">
+                    </div>
+
+                    <div class="field">
+                        <button class="button is-success">Save Category</button>
+                    </div>
+                    </form>        
+                </div>
+            <button class="modal-close is-large" aria-label="close" @click="showCategoryForm = !showCategoryForm"></button>
+        </div>
+
         <div class="column is-4" v-for="movie in movies" :key="movie.id">
             <div class="card">
             <div class="card-image">
@@ -23,11 +43,14 @@ export default {
     name: 'TabMovie',
     props: {
         category: String,
-        categories: Array
+        categories: Array,
+        categoryTitle: String
     },
     data () {
         return {
-            movies: []
+            movies: [],
+            title: '',
+            showCategoryForm: false
         }
     },
     mounted () {
@@ -48,6 +71,8 @@ export default {
                         })
                     })
             }
+        } else {
+            this.title = this.$props.categoryTitle
         }
     },
     firestore () {
@@ -78,6 +103,14 @@ export default {
         },
         embedable (url) {
             return 'https://youtube.com/embed/' + url.split("=")[1]
+        },
+        saveCategory () {
+            const category = {
+                title: this.title
+            }
+            db.collection('categories').doc(this.$props.category).update(category)
+
+            this.$emit('updateCategory', this.title)
         }
     }
 }
